@@ -85,27 +85,31 @@ function generatePuzzle() {
 
   let target;
 
-  if (mv > 200) {
+  if (mv > 400) {
     const keys = Object.keys(integerResults);
     target = keys[Math.floor(Math.random() * keys.length)];
   } else {
-    let buckets = [[], [], [], [], [], []];
+    let buckets = [[[], [], [], [], [], []],[[], [], [], [], [], []]];
+    let below = false;
+    let above = false;
 
     for (const [e, v] of Object.entries(integerResults)) {
-        if (v > 100 && v <= 200) {
-            buckets[5].push(e);
-        } else if (v <= 100) {
-            const idx = Math.floor((v - 1) / 20);
-            buckets[idx].push(e);
-        }
+      const half = Math.floor((e-10)/45);
+      if (half === 0) {
+        below = true;
+      } else {
+        above = true;
+      }
+      buckets[half][Math.min(Math.floor((v-1)/20),5)].push(e)
     }
 
+    const row = (below && above) ? Math.floor(Math.random()*2) : (below ? 0 : 1);
     let indices = [];
     for (let i = 0; i < 6; i++) {
-        if (buckets[i].length > 0) indices.push(i);
+      if (buckets[row][i].length > 0) indices.push(i);
     }
 
-    const chosenBucket = buckets[indices[Math.floor(Math.random() * indices.length)]];
+    const chosenBucket = buckets[row][indices[Math.floor(Math.random() * indices.length)]];
     target = chosenBucket[Math.floor(Math.random() * chosenBucket.length)];
   }
   return [numbers,target]
