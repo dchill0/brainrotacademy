@@ -8,7 +8,7 @@ import {
   increment
 } from "firebase/firestore";
 
-import { db } from "../firebase";
+import { db } from "../firebase.js";
 
 function randomNum() {
   return (

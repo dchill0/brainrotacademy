@@ -1,6 +1,6 @@
 import {
   AuthProvider
-} from "../context/AuthContext";
+} from "../context/AuthContext.js";
 
 export const metadata = {
   title: "Mastery Platform",

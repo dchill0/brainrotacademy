@@ -12,7 +12,7 @@ import {
 import {
   auth,
   db
-} from "../firebase";
+} from "../firebase.js";
 
 export default function Profile({
   user,

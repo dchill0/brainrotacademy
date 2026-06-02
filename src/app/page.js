@@ -3,14 +3,14 @@
 import Link from "next/link";
 
 import AuthButtons from
-  "../components/AuthButtons";
+  "../components/AuthButtons.js";
 
 import MiniGame from
-  "../components/MiniGame";
+  "../components/Minigame.js";
 
 import {
   useAuth
-} from "../context/AuthContext";
+} from "../context/AuthContext.js";
 
 export default function Home() {
   const { user } = useAuth();

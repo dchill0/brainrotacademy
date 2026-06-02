@@ -1,11 +1,11 @@
 "use client";
 
 import Profile from
-  "../../components/Profile";
+  "../../components/Profile.js";
 
 import {
   useAuth
-} from "../../context/AuthContext";
+} from "../../context/AuthContext.js";
 
 export default function ProfilePage() {
   const { user } = useAuth();

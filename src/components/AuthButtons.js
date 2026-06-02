@@ -11,7 +11,7 @@ import {
 import {
   auth,
   googleProvider
-} from "../firebase";
+} from "../firebase.js";
 
 export default function AuthButtons() {
   const [email, setEmail] =
