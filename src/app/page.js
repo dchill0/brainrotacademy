@@ -1,47 +1,45 @@
-// "use client";
+"use client";
 
-// import Link from "next/link";
+import Link from "next/link";
 
-// import AuthButtons from
-//   "../components/AuthButtons.js";
+import AuthButtons from
+  "../components/AuthButtons";
 
-// import MiniGame from
-//   "../components/Minigame.js";
+import MiniGame from
+  "../components/Minigame";
 
-// import {
-//   useAuth
-// } from "../context/AuthContext.js";
-
-// export default function Home() {
-//   const { user } = useAuth();
-
-//   return (
-//     <main
-//       style={{
-//         padding: "2rem",
-//       }}
-//     >
-//       <h1>
-//         Mastery Platform
-//       </h1>
-
-//       {user ? (
-//         <Link href="/profile">
-//           Profile
-//         </Link>
-//       ) : (
-//         <AuthButtons />
-//       )}
-
-//       <hr />
-
-//       <MiniGame
-//         user={user}
-//       />
-//     </main>
-//   );
-// }
+import {
+  useAuth
+} from "../context/AuthContext";
 
 export default function Home() {
-  return <h1>IT WORKS</h1>;
+  const { user } = useAuth();
+
+  return (
+    <main
+      style={{
+        padding: "2rem",
+      }}
+    >
+      <h1>
+        Mastery Platform
+      </h1>
+
+      {user ? (
+        <Link href="/profile">
+          <button>
+            Profile
+          </button>
+        </Link>
+      ) : (
+        <AuthButtons />
+      )}
+
+      <hr />
+
+      <MiniGame
+        user={user}
+      />
+    </main>
+  );
 }

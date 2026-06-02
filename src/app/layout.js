@@ -1,6 +1,4 @@
-import {
-  AuthProvider
-} from "../context/AuthContext.js";
+import ClientProviders from "../components/ClientProviders";
 
 export const metadata = {
   title: "Mastery Platform",
@@ -12,9 +10,9 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <AuthProvider>
+        <ClientProviders>
           {children}
-        </AuthProvider>
+        </ClientProviders>
       </body>
     </html>
   );

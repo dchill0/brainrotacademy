@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
 
 import { signOut } from "firebase/auth";
@@ -12,7 +14,7 @@ import {
 import {
   auth,
   db
-} from "../firebase.js";
+} from "../firebase";
 
 export default function Profile({
   user,
@@ -50,13 +52,21 @@ export default function Profile({
         Mastery Points: {points}
       </p>
 
-      <button
-        onClick={() =>
-          signOut(auth)
-        }
-      >
-        Logout
-      </button>
+      <Link href="/">
+        <button>
+          Back to Home
+        </button>
+      </Link>
+
+      <Link href="/">
+        <button
+          onClick={() =>
+            signOut(auth)
+          }
+        >
+          Logout
+        </button>
+      </Link>
     </div>
   );
 }

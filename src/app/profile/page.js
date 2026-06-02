@@ -1,11 +1,11 @@
 "use client";
 
 import Profile from
-  "../../components/Profile.js";
+  "../../components/Profile";
 
 import {
   useAuth
-} from "../../context/AuthContext.js";
+} from "../../context/AuthContext";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <p>
-        Please log in.
+        You shouldn't be seeing this...
       </p>
     );
   }

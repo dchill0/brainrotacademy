@@ -1,34 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import {
-  doc,
-  setDoc,
-  increment
-} from "firebase/firestore";
-
-import { db } from "../firebase.js";
+import { doc, setDoc, increment } from "firebase/firestore";
+import { db } from "../firebase";
 
 function randomNum() {
-  return (
-    Math.floor(
-      Math.random() * 10
-    ) + 1
-  );
+  return Math.floor(Math.random() * 10) + 1;
 }
 
-export default function MiniGame({
-  user,
-}) {
-  const [a, setA] =
-    useState(randomNum());
+export default function MiniGame({ user }) {
+  const [a, setA] = useState(null);
+  const [b, setB] = useState(null);
+  const [answer, setAnswer] = useState("");
 
-  const [b, setB] =
-    useState(randomNum());
-
-  const [answer, setAnswer] =
-    useState("");
+  useEffect(() => {
+    setA(randomNum());
+    setB(randomNum());
+  }, []);
 
   function nextQuestion() {
     setA(randomNum());
@@ -43,24 +32,23 @@ export default function MiniGame({
       doc(db, "users", user.uid),
       {
         email: user.email,
-        masteryPoints:
-          increment(10),
+        masteryPoints: increment(10),
       },
-      {
-        merge: true,
-      }
+      { merge: true }
     );
   }
 
   async function submit() {
-    if (
-      Number(answer) ===
-      a + b
-    ) {
-      await awardPoints();
+    if (a === null || b === null) return;
 
+    if (Number(answer) === a + b) {
+      await awardPoints();
       nextQuestion();
     }
+  }
+
+  if (a === null || b === null) {
+    return <p>Loading game...</p>;
   }
 
   return (
@@ -73,16 +61,10 @@ export default function MiniGame({
 
       <input
         value={answer}
-        onChange={(e) =>
-          setAnswer(
-            e.target.value
-          )
-        }
+        onChange={(e) => setAnswer(e.target.value)}
       />
 
-      <button onClick={submit}>
-        Submit
-      </button>
+      <button onClick={submit}>Submit</button>
     </div>
   );
 }
