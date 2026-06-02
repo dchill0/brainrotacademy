@@ -69,7 +69,7 @@ function generatePuzzle() {
               let r = stack[0];
               if (r[1] !== 0 && r[0]%r[1] === 0) {
                 let ir = Math.floor(r[0] / r[1]);
-                if (ir >= 10 && ir <= 99) {
+                if (ir >= 24 && ir <= 99) {
                   if (!integerResults[ir]) integerResults[ir] = 0;
                   integerResults[ir]++;
                 }
@@ -94,7 +94,7 @@ function generatePuzzle() {
     let above = false;
 
     for (const [e, v] of Object.entries(integerResults)) {
-      const half = Math.floor((e-10)/45);
+      const half = Math.floor((e-24)/38);
       if (half === 0) {
         below = true;
       } else {
