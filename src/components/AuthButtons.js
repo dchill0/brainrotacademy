@@ -68,7 +68,7 @@ export default function AuthButtons() {
 
       <br />
 
-      <button onClick={signup}>
+      {/* <button onClick={signup}>
         Sign Up
       </button>
 
@@ -78,7 +78,7 @@ export default function AuthButtons() {
 
       <button onClick={googleLogin}>
         Google Login
-      </button>
+      </button> */}
     </div>
   );
 }
