@@ -54,7 +54,7 @@ export default function Profile({
 
       <Link href="/">
         <button>
-          Back to Home
+          Back
         </button>
       </Link>
 

@@ -80,37 +80,38 @@ function generatePuzzle() {
       }
     }
   }
-  const values = Object.values(integerResults);
-  const mv = Math.min(...values);
 
-  let target;
-
-  if (mv > 400) {
-    const keys = Object.keys(integerResults);
-    target = keys[Math.floor(Math.random() * keys.length)];
-  } else {
-    let buckets = [[[], [], [], [], [], []],[[], [], [], [], [], []]];
-    let below = false;
-    let above = false;
-
-    for (const [e, v] of Object.entries(integerResults)) {
-      const half = Math.floor((e-20)/40);
-      if (half === 0) {
-        below = true;
-      } else {
-        above = true;
-      }
-      buckets[half][Math.min(Math.floor((v-1)/20),5)].push(e)
+  let below = [];
+  let above = [];
+  for (const key in integerResults) {
+    const k = Number(key);
+    if (k < 60) {
+      below.push([integerResults[k],k]);
+    } else {
+      above.push([integerResults[k],k]);
     }
-
-    const row = (below && above) ? Math.floor(Math.random()*2) : (below ? 0 : 1);
-    let indices = [];
-    for (let i = 0; i < 6; i++) {
-      if (buckets[row][i].length > 0) indices.push(i);
+  }
+  below.sort((t1,t2) => t1[0]-t2[0]);
+  above.sort((t1,t2) => t1[0]-t2[0]);
+  let i1 = 0, i2 = 0;
+  const belowLen = below.length;
+  const aboveLen = above.length;
+  let level = 50;
+  let target = null;
+  while (true) {
+    while (i1 < belowLen && below[i1][0] <= level) {
+      i1++;
     }
-
-    const chosenBucket = buckets[row][indices[Math.floor(Math.random() * indices.length)]];
-    target = chosenBucket[Math.floor(Math.random() * chosenBucket.length)];
+    while (i2 < aboveLen && above[i2][0] <= level) {
+      i2++;
+    }
+    if (i1 > 0 && i2 > 0) {
+      const belowIndex = Math.floor(Math.random()*i1);
+      const aboveIndex = Math.floor(Math.random()*i2);
+      target = Math.random() < 0.5 ? below[belowIndex][1] : above[aboveIndex][1];
+      break;
+    }
+    level*=2;
   }
   return [numbers,target]
 }
@@ -288,10 +289,11 @@ export default function MiniGame({ user }) {
 
   return (
     <div>
-      <h2>Math Game</h2>
+      <h2>Daily Puzzles</h2>
 
-      <h3>Numbers: {numbers.join(" ")}</h3>
-      <h3>Target: {target}</h3>
+      <h3>Can you make {target} using the numbers {numbers.join(", ")}?</h3>
+      <h4>Use the operations addition (+), subtraction (-), multiplication (*), and division (/)</h4>
+      <h4>Additionally, you must use each number exactly once in your answer</h4>
 
       <input
         value={answer}

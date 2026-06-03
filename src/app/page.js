@@ -6,7 +6,10 @@ import AuthButtons from
   "../components/AuthButtons";
 
 import MiniGame from
-  "../components/Minigame";
+  "../components/MiniGame";
+
+import MainTabs from
+  "../components/MainTabs";
 
 import {
   useAuth
@@ -38,6 +41,12 @@ export default function Home() {
       <hr />
 
       <MiniGame
+        user={user}
+      />
+
+      <hr />
+
+      <MainTabs
         user={user}
       />
     </main>
