@@ -5,7 +5,9 @@ import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup
+  signInWithPopup,
+  sendEmailVerification,
+  signOut
 } from "firebase/auth";
 
 import {
@@ -21,26 +23,53 @@ export default function AuthButtons() {
     useState("");
 
   async function signup() {
-    await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      await sendEmailVerification(user);
+      await signOut(auth);
+      alert(
+        "Sign up successful! A verification email has been sent to your inbox. " +
+        "If you don't see it, please check your spam or junk folder"
+      );
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
   }
 
   async function login() {
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        await signOut(auth);
+      alert(
+        "A verification email has already been sent to your inbox. " +
+        "If you don't see it, please check your spam or junk folder"
+      );
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
   }
 
   async function googleLogin() {
-    await signInWithPopup(
-      auth,
-      googleProvider
-    );
+    try {
+      await signInWithPopup(
+        auth,
+        googleProvider
+      );
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
   }
 
   return (

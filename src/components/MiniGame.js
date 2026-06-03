@@ -247,12 +247,11 @@ export default function MiniGame({ user }) {
   }
 
   async function awardPoints() {
-    if (!user) return;
+    if (!user || !user.emailVerified) return;
 
     await setDoc(
       doc(db, "users", user.uid),
       {
-        email: user.email,
         masteryPoints: increment(10),
       },
       { merge: true }
