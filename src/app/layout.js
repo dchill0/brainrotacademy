@@ -1,5 +1,7 @@
 import ClientProviders from "../components/ClientProviders";
 
+import "./globals.css"
+
 export const metadata = {
   title: "Mastery Platform",
 };

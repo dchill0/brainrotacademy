@@ -24,3 +24,39 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+button {
+  background-color: transparent;
+  border: 2px solid #0070f3; /* change to your desired color */
+  color: #0070f3;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+button:hover {
+  background-color: #0070f3;
+  color: white;
+}
+
+
+input, textarea {
+  background-color: var(--background); /* uses the theme background */
+  color: var(--foreground);           /* uses the theme foreground */
+  border: 2px solid var(--foreground); /* optional: border in theme color */
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #999999; /* or a lighter shade of --foreground for contrast */
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #0070f3; /* highlight on focus */
+  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.3);
+}

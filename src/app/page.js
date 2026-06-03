@@ -16,7 +16,11 @@ import {
 } from "../context/AuthContext";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <main
@@ -28,7 +32,7 @@ export default function Home() {
         Brainrot Academy
       </h1>
 
-      {user ? (
+      {user && user.emailVerified ? (
         <Link href="/profile">
           <button>
             Profile
