@@ -24,8 +24,8 @@ export default function Home() {
         padding: "2rem",
       }}
     >
-      <h1>
-        Mastery Platform
+      <h1 style={{ textAlign: "center" }}>
+        Brainrot Academy
       </h1>
 
       {user ? (
