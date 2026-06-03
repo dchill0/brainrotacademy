@@ -15,47 +15,49 @@ import {
   googleProvider
 } from "../firebase";
 
-export default function AuthButtons() {
-  const [email, setEmail] =
-    useState("");
+import Link from "next/link";
 
-  const [password, setPassword] =
-    useState("");
+export default function AuthButtons({ user }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState(null);
 
-  async function signup() {
+  async function handleSubmit() {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      await sendEmailVerification(user);
-      await signOut(auth);
-      alert(
-        "Sign up successful! A verification email has been sent to your inbox. " +
-        "If you don't see it, please check your spam or junk folder"
-      );
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
-  }
-
-  async function login() {
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-      if (!user.emailVerified) {
+      if (mode === "signup") {
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredential.user;
+        await sendEmailVerification(user);
         await signOut(auth);
-      alert(
-        "A verification email has already been sent to your inbox. " +
-        "If you don't see it, please check your spam or junk folder"
-      );
+        alert(
+          "Sign up successful! A verification email has been sent to your inbox. " +
+          "If you don't see it, please check your spam or junk folder"
+        );
       }
+
+      if (mode === "login") {
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        const user = userCredential.user;
+        if (!user.emailVerified) {
+          await signOut(auth);
+          alert(
+            "A verification email has already been sent to your inbox. " +
+            "If you don't see it, please check your spam or junk folder"
+          );
+        }
+      }
+
+      setMode(null);
+      setEmail("");
+      setPassword("");
     } catch (error) {
       alert("Error: " + error.message);
     }
@@ -72,42 +74,55 @@ export default function AuthButtons() {
     }
   }
 
+  if (user && user.emailVerified) {
+    return (
+      <Link href="/profile">
+        <button>Profile</button>
+      </Link>
+    );
+  }
+
   return (
-    <div>
-      <h2>Login / Signup</h2>
-
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) =>
-          setEmail(e.target.value)
-        }
-      />
-
-      <br />
-
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) =>
-          setPassword(e.target.value)
-        }
-      />
-
-      <br />
-
-      <button onClick={signup}>
-        Sign Up
+    <div style={{ position: "relative", display: "flex", gap: "0.5rem" }}>
+      <button
+        onClick={() => setMode(mode === "signup" ? null : "signup")}
+        className={mode === "signup" ? "selected" : ""}
+      >
+        Signup
       </button>
 
-      <button onClick={login}>
+      <button
+        onClick={() => setMode(mode === "login" ? null : "login")}
+        className={mode === "login" ? "selected" : ""}
+      >
         Login
       </button>
 
       <button onClick={googleLogin}>
         Google Login
       </button>
+
+      {mode && (
+        <div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button onClick={handleSubmit}>
+            {mode === "signup" ? "Signup »" : "Login »"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

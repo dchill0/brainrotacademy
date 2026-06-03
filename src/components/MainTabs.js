@@ -8,6 +8,11 @@ export default function MainTabs({ user }) {
   const [activeTab, setActiveTab] = useState("learn");
   const [learnScroll, setLearnScroll] = useState(0);
   const [competeScroll, setCompeteScroll] = useState(0);
+  const [moduleHistory, setModuleHistory] = useState(() => {
+    if (typeof window === "undefined") return [];
+    const savedHistory = localStorage.getItem("savedHistory");
+    return savedHistory ? JSON.parse(savedHistory) : [];
+  });
 
   const handleTabClick = (tab) => {
     if (activeTab === "learn") {
@@ -28,7 +33,7 @@ export default function MainTabs({ user }) {
 
   return (
     <div>
-      <div style={{ display: 'flex', width: '100%', borderBottom: '2px solid #ccc' }}>
+      <div style={{ display: 'flex', width: '100%', borderBottom: '2px solid #ccc', position: 'sticky', top: 0, zIndex: 999, backgroundColor: '#fff' }}>
         <button
           onClick={() => handleTabClick('learn')}
           style={{
@@ -36,7 +41,6 @@ export default function MainTabs({ user }) {
             padding: '1rem 0',
             border: 'none',
             borderBottom: activeTab === 'learn' ? '4px solid blue' : '4px solid transparent',
-            background: 'none',
             fontWeight: activeTab === 'learn' ? 'bold' : 'normal',
             cursor: 'pointer',
           }}
@@ -50,7 +54,6 @@ export default function MainTabs({ user }) {
             padding: '1rem 0',
             border: 'none',
             borderBottom: activeTab === 'compete' ? '4px solid blue' : '4px solid transparent',
-            background: 'none',
             fontWeight: activeTab === 'compete' ? 'bold' : 'normal',
             cursor: 'pointer',
           }}
@@ -60,7 +63,7 @@ export default function MainTabs({ user }) {
       </div>
 
       <div style={{ padding: '1rem 0' }}>
-        {activeTab === 'learn' && <Learn/>}
+        {activeTab === 'learn' && <Learn moduleHistory={moduleHistory} setModuleHistory={setModuleHistory}/>}
         {activeTab === 'compete' && (
           user ? <Compete/> : <div><h2>Login or create an account to complete with others</h2></div>
         )}

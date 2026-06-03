@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import AuthButtons from
   "../components/AuthButtons";
 
@@ -23,36 +21,30 @@ export default function Home() {
   }
 
   return (
-    <main
-      style={{
-        padding: "2rem",
-      }}
-    >
-      <h1 style={{ textAlign: "center" }}>
-        Brainrot Academy
-      </h1>
+    <main style={{ padding: 0, margin: 0 }}>
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0.5rem 2rem",
+          backgroundColor: "#222",
+          color: "#fff",
+          top: 0,
+          zIndex: 1000,
+        }}
+      >
+        <div>
+          <AuthButtons user={user} />
+        </div>
+        <h1 style={{ margin: 0 }}>Brainrot Academy</h1>
+      </header>
 
-      {user && user.emailVerified ? (
-        <Link href="/profile">
-          <button>
-            Profile
-          </button>
-        </Link>
-      ) : (
-        <AuthButtons />
-      )}
+      <div style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <MiniGame user={user} />
 
-      <hr />
-
-      <MiniGame
-        user={user}
-      />
-
-      <hr />
-
-      <MainTabs
-        user={user}
-      />
+        <MainTabs user={user} />
+      </div>
     </main>
   );
 }

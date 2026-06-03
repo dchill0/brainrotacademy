@@ -40,6 +40,10 @@ button:hover {
   color: white;
 }
 
+button.selected {
+  background-color: #0070f3;
+  color: white;
+}
 
 input, textarea {
   background-color: var(--background); /* uses the theme background */
@@ -59,4 +63,43 @@ input:focus, textarea:focus {
   outline: none;
   border-color: #0070f3; /* highlight on focus */
   box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.3);
+}
+
+
+.btn-ai {
+  position: relative;
+  padding: 0.65rem 2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #6366f1, #a855f7, #06b6d4);
+  background-size: 200% 200%;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+  overflow: hidden;
+}
+
+/* animated gradient shift */
+.btn-ai:hover {
+  background-position: right center;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(99, 102, 241, 0.35);
+}
+
+/* subtle glow ring */
+.btn-ai::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6366f1, #a855f7, #06b6d4);
+  z-index: -1;
+  filter: blur(12px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-ai:hover::after {
+  opacity: 0.6;
 }
