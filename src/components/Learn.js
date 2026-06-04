@@ -7,7 +7,7 @@ import { db } from "../firebase";
 export default function Learn({ user, moduleHistory, setModuleHistory }) {
   const [type, setType] = useState("lesson");
   const [topic, setTopic] = useState("");
-  const [creditsUsed, setCreditsUsed] = useState(0);
+  const [creditsUsed, setCreditsUsed] = useState(3);
 
   const isAdmin = user?.email === "dchill0624@gmail.com";
 
@@ -127,7 +127,7 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
 
         {!isAdmin && user && user.emailVerified && (
           <span className="ml-2 text-gray-600">
-            {3-creditsUsed} credit{3-creditsUsed !== 1 ? "s" : ""} left today
+            {DAILY_CREDITS-creditsUsed} credit{DAILY_CREDITS-creditsUsed !== 1 ? "s" : ""} left today
           </span>
         )}
       </div>
