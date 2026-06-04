@@ -8,11 +8,7 @@ export default function MainTabs({ user }) {
   const [activeTab, setActiveTab] = useState("learn");
   const [learnScroll, setLearnScroll] = useState(0);
   const [competeScroll, setCompeteScroll] = useState(0);
-  const [moduleHistory, setModuleHistory] = useState(() => {
-    if (typeof window === "undefined") return [];
-    const savedHistory = localStorage.getItem("savedHistory");
-    return savedHistory ? JSON.parse(savedHistory) : [];
-  });
+  const [moduleHistory, setModuleHistory] = useState([]);
 
   const handleTabClick = (tab) => {
     if (activeTab === "learn") {
