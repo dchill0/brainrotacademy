@@ -63,9 +63,9 @@ export default function MainTabs({ user }) {
       </div>
 
       <div style={{ padding: '1rem 0' }}>
-        {activeTab === 'learn' && <Learn moduleHistory={moduleHistory} setModuleHistory={setModuleHistory}/>}
+        {activeTab === 'learn' && <Learn user={user} moduleHistory={moduleHistory} setModuleHistory={setModuleHistory}/>}
         {activeTab === 'compete' && (
-          user ? <Compete/> : <div><h2>Login or create an account to complete with others</h2></div>
+          user && user.emailVerified ? <Compete/> : <div><h2>Login or create an account to complete with others</h2></div>
         )}
       </div>
     </div>

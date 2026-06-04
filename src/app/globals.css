@@ -103,3 +103,15 @@ input:focus, textarea:focus {
 .btn-ai:hover::after {
   opacity: 0.6;
 }
+
+.btn-x {
+  background-color: transparent;
+  border: none;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.btn-x:hover {
+  background-color: transparent;
+  color: #991b1b;
+}
