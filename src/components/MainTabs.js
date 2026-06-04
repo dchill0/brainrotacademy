@@ -4,11 +4,9 @@ import { useState, useLayoutEffect } from "react";
 import Learn from "./Learn";
 import Compete from "./Compete";
 
-export default function MainTabs({ user }) {
-  const [activeTab, setActiveTab] = useState("learn");
+export default function MainTabs({ user, activeTab, setActiveTab, moduleHistory, setModuleHistory }) {
   const [learnScroll, setLearnScroll] = useState(0);
   const [competeScroll, setCompeteScroll] = useState(0);
-  const [moduleHistory, setModuleHistory] = useState([]);
 
   const handleTabClick = (tab) => {
     if (activeTab === "learn") {

@@ -2,6 +2,8 @@
 
 import { AuthProvider } from "../context/AuthContext";
 
+import { UIProvider } from "../context/UIContext";
+
 export default function ClientProviders({ children }) {
-  return <AuthProvider>{children}</AuthProvider>;
+  return <AuthProvider><UIProvider>{children}</UIProvider></AuthProvider>;
 }

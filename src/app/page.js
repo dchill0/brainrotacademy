@@ -13,8 +13,15 @@ import {
   useAuth
 } from "../context/AuthContext";
 
+import {
+  useUI
+} from "../context/UIContext";
+
+import { useState } from "react";
+
 export default function Home() {
   const { user, loading } = useAuth();
+  const { activeTab, setActiveTab, moduleHistory, setModuleHistory } = useUI();
 
   if (loading) {
     return <p>Loading...</p>;
@@ -43,7 +50,7 @@ export default function Home() {
       <div style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <MiniGame user={user} />
 
-        <MainTabs user={user} />
+        <MainTabs user={user} activeTab={activeTab} setActiveTab={setActiveTab} moduleHistory={moduleHistory} setModuleHistory={setModuleHistory} />
       </div>
     </main>
   );
