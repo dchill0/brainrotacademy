@@ -117,114 +117,131 @@ function generatePuzzle() {
 }
 
 function checkAnswer(numbers,target,expression) {
-  let exprArr = [...expression].filter(ch => ch !== " ");
-  const allowedChars = "0123456789+-*x/()[]";
-  let L = exprArr.length;
-  if (L == 0) {
-    return "NO_ANSWER";
-  }
-  if (L > 100) {
-    return "LONG_ANSWER";
-  }
-  for (let i = 0; i < L; i++) {
-    let e = exprArr[i]
-    if (!allowedChars.includes(e)) {
-      return "BAD_ANSWER";
-    } else if (e === "x") {
-      exprArr[i] = "*";
-    } else if (e === "[") {
-      exprArr[i] = "(";
-    } else if (e === "]") {
-      exprArr[i] = ")";
+  try {
+    let exprArr = [...expression].filter(ch => ch !== " ");
+    const allowedChars = "0123456789+-*x/()[]";
+    let L = exprArr.length;
+    if (L == 0) {
+      throw "NO_ANSWER";
     }
-  }
-  expression = exprArr.join("");
-
-  let pos = 0;
-  function peek() {
-    if (pos < L) return expression[pos];
-    return "n";
-  }
-
-  function consume() {
-    let ch = peek();
-    if (ch !== "n") pos++;
-    return ch;
-  }
-
-  let terms = [];
-
-  function parseExpression() {
-    let [a,b] = parseTerm();
-
-    while ("+-".includes(peek())) {
-      let op = consume();
-      let [c,d] = parseTerm();
-      if (op === "+") {
-        [a,b] = [a*d+b*c,b*d];
-      } else {
-        [a,b] = [a*d-b*c,b*d];
+    if (L > 100) {
+      throw "LONG_ANSWER";
+    }
+    for (let i = 0; i < L; i++) {
+      let e = exprArr[i]
+      if (!allowedChars.includes(e)) {
+        throw "BAD_ANSWER";
+      } else if (e === "x") {
+        exprArr[i] = "*";
+      } else if (e === "[") {
+        exprArr[i] = "(";
+      } else if (e === "]") {
+        exprArr[i] = ")";
       }
     }
+    expression = exprArr.join("");
 
-    return [a,b];
-  }
+    let pos = 0;
+    function peek() {
+      if (pos < L) return expression[pos];
+      return "n";
+    }
 
-  function parseTerm() {
-    let [a,b] = parseFactor();
+    function consume() {
+      let ch = peek();
+      if (ch !== "n") pos++;
+      return ch;
+    }
 
-    while ("*/".includes(peek())) {
-      let op = consume();
-      let [c,d] = parseTerm();
-      if (op === "*") {
-        [a,b] = [a*c,b*d];
-      } else {
-        [a,b] = [a*d,b*c];
+    let terms = [];
+
+    function parseExpression() {
+      let [a,b] = parseTerm();
+
+      while ("+-".includes(peek())) {
+        let op = consume();
+        let [c,d] = parseTerm();
+        if (op === "+") {
+          [a,b] = [a*d+b*c,b*d];
+        } else {
+          [a,b] = [a*d-b*c,b*d];
+        }
       }
+
+      return [a,b];
     }
 
-    return [a,b];
-  }
+    function parseTerm() {
+      let [a,b] = parseFactor();
 
-  function parseFactor() {
-    let ch = peek();
-    if (ch === "n") {
-      return "INV_ANSWER";
-    }
-    if (ch === "(") {
-      consume();
-      let value = parseExpression();
-      if (consume() !== ")") {
-        return "INV_ANSWER";
+      while (true) {
+        let ch = peek();
+        if ("*/".includes(peek())) {
+          let op = consume();
+          let [c,d] = parseFactor();
+          if (op === "*") {
+            [a,b] = [a*c,b*d];
+          } else {
+            [a,b] = [a*d,b*c];
+          }
+        } else if (ch === "(") {
+          let [c,d] = parseFactor();
+          [a,b] = [a*c,b*d];
+        } else {
+          break;
+        }
       }
-      return value;
+
+      return [a,b];
     }
-    if (/\d/.test(ch)) {
-      let start = pos;
-      while (peek() && /\d/.test(peek())) {
+
+    function parseFactor() {
+      let ch = peek();
+      if (ch === "+" || ch === "-") {
+        let op = consume();
+        let [a,b] = parseFactor();
+        return op === "-" ? [-a,b] : [a,b];
+      }
+      if (ch === "n") {
+        throw "INV_ANSWER";
+      }
+      if (ch === "(") {
         consume();
+        let value = parseExpression();
+        if (consume() !== ")") {
+          throw "INV_ANSWER";
+        }
+        return value;
       }
-      let num = parseInt(expression.slice(start,pos),10);
-      terms.push(num);
-      return [num,1];
+      if (/\d/.test(ch)) {
+        let start = pos;
+        while (peek() && /\d/.test(peek())) {
+          consume();
+        }
+        let num = parseInt(expression.slice(start,pos),10);
+        terms.push(num);
+        return [num,1];
+      }
+      throw "INV_ANSWER";
     }
-    return "INV_ANSWER";
-  }
 
-  let [a,b] = parseExpression();
-  if (pos !== L) {
-    return "INV_ANSWER";
-  }
-  if (b !== 0 && a%b === 0 && b*target === a) {
-    const sorted_numbers = [...numbers].sort((z1,z2) => z1-z2);
-    const sorted_terms = [...terms].sort((z1,z2) => z1-z2);
-    if (JSON.stringify(sorted_numbers) === JSON.stringify(sorted_terms)) {
-      return "RIGHT_ANSWER";
-    } else {
-      return "CHEAT_ANSWER";
+    let [a,b] = parseExpression();
+    if (pos !== L) {
+      throw "INV_ANSWER";
     }
+    if (b !== 0 && a%b === 0 && b*target === a) {
+      const sorted_numbers = [...numbers].sort((z1,z2) => z1-z2);
+      const sorted_terms = [...terms].sort((z1,z2) => z1-z2);
+      if (JSON.stringify(sorted_numbers) === JSON.stringify(sorted_terms)) {
+        return "RIGHT_ANSWER";
+      } else {
+        throw "CHEAT_ANSWER";
+      }
+    }
+    throw "WRONG_ANSWER";
+  } catch (err) {
+    return err;
   }
-  return "WRONG_ANSWER";
 }
 
 export default function MiniGame({ user }) {
