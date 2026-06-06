@@ -140,6 +140,7 @@ export default function Learn({ user, UIState, setUIState }) {
       setTopic("");
 
       setCreditsUsed(data.creditsUsed);
+      setClickedToday(true);
     } catch (err) {
       console.error(err);
       alert("Error generating response");
@@ -352,7 +353,7 @@ export default function Learn({ user, UIState, setUIState }) {
             key={item.id}
             className="text-gray-600 flex justify-between items-center bg-white shadow-md rounded px-4 py-2 relative z-0"
           >
-            {item.option === "AI" ? (
+            {item.parameters.option === "AI" ? (
               <span>
                 {item.content}
               </span>
