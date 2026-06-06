@@ -51,6 +51,10 @@ export async function POST(req) {
     let data = userSnap.exists ? userSnap.data() : null;
 
     if (!data || data.lastClickDate !== today) {
+      await userRef.set(
+        { creditsUsed: 0, lastClickDate: today },
+        { merge: true }
+      );
       data = { creditsUsed: 0, lastClickDate: today };
     }
 
@@ -81,9 +85,10 @@ export async function POST(req) {
         },
         { merge: true }
       );
+      data.creditsUsed++;
     }
 
-    return Response.json({ message });
+    return Response.json({ message, creditsUsed: data.creditsUsed });
   } catch (error) {
     return Response.json({ error: "Server error" }, { status: 500 });
   }

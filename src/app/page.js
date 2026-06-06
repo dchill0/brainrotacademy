@@ -21,7 +21,7 @@ import { useState } from "react";
 
 export default function Home() {
   const { user, loading } = useAuth();
-  const { activeTab, setActiveTab, moduleHistory, setModuleHistory } = useUI();
+  const { UIState, setUIState } = useUI();
 
   if (loading) {
     return <p>Loading...</p>;
@@ -44,13 +44,17 @@ export default function Home() {
         <div>
           <AuthButtons user={user} />
         </div>
-        <h1 style={{ margin: 0 }}>Brainrot Academy</h1>
+        <h1 style={{ margin: 0 }}>Brainrot Academy (WIP)</h1>
       </header>
 
       <div style={{ padding: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <MiniGame user={user} />
 
-        <MainTabs user={user} activeTab={activeTab} setActiveTab={setActiveTab} moduleHistory={moduleHistory} setModuleHistory={setModuleHistory} />
+        <MainTabs 
+          user={user}
+          UIState = {UIState}
+          setUIState = {setUIState}
+        />
       </div>
     </main>
   );

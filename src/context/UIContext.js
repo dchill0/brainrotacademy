@@ -9,11 +9,10 @@ import {
 const UIContext = createContext();
 
 export const UIProvider = ({ children }) => {
-  const [activeTab, setActiveTab] = useState("learn");
-  const [moduleHistory, setModuleHistory] = useState([]);
+  const [UIState, setUIState] = useState({ activeTab: "learn", moduleHistory: [], studyType: "practice problem", overlayOption: null });
 
   return (
-    <UIContext.Provider value={{ activeTab, setActiveTab, moduleHistory, setModuleHistory }}>
+    <UIContext.Provider value={{ UIState, setUIState }}>
       {children}
     </UIContext.Provider>
   );

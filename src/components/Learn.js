@@ -3,12 +3,61 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { randomChoice, subjectsData, subtopicProblemGeneratorsMap } from "../data/subjectsData";
 
-export default function Learn({ user, moduleHistory, setModuleHistory }) {
-  const [type, setType] = useState("lesson");
+export default function Learn({ user, UIState, setUIState }) {
   const [topic, setTopic] = useState("");
   const [creditsUsed, setCreditsUsed] = useState(3);
+  const [clickedToday, setClickedToday] = useState(true);
   const [generateLoading, setGenerateLoading] = useState(false);
+
+  const [selectedSubjects, setSelectedSubjects] = useState(() => {
+    const initial = {};
+    for (let subject in subjectsData) {
+      initial[subject] = { checked: false, subtopics: {} };
+      subjectsData[subject].forEach((sub) => (initial[subject].subtopics[sub.name] = false));
+    }
+    return initial;
+  });
+  const handleSubjectChange = (subject) => {
+    setSelectedSubjects((prev) => {
+      const newChecked = !prev[subject].checked;
+      const newSubtopics = {};
+      for (let sub of subjectsData[subject]) {
+        newSubtopics[sub.name] = newChecked;
+      }
+      return { ...prev, [subject]: { checked: newChecked, subtopics: newSubtopics } };
+    });
+  };
+  const handleSubtopicChange = (subject, subtopic) => {
+    setSelectedSubjects((prev) => {
+      const newSubtopics = { ...prev[subject].subtopics, [subtopic]: !prev[subject].subtopics[subtopic] };
+      const allUnchecked = Object.values(newSubtopics).every((v) => !v);
+      return { ...prev, [subject]: { checked: !allUnchecked, subtopics: newSubtopics } };
+    });
+  };
+  const regenerateProblem = (selectedSubtopics) => {
+    const randomSubtopic = randomChoice(selectedSubtopics);
+    const subtopicProblemGenerators = subtopicProblemGeneratorsMap[randomSubtopic];
+    if (subtopicProblemGenerators.length === 0) return ["",""];
+    return randomChoice(subtopicProblemGenerators)();
+  };
+  const toggleReveal = (id) => {
+    setUIState((prev) => ({
+      ...prev,
+      moduleHistory: prev.moduleHistory.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              parameters: {
+                ...m.parameters,
+                revealed: !m.parameters?.revealed,
+              },
+            }
+          : m
+      ),
+    }));
+  };
 
   const DAILY_CREDITS = 3;
 
@@ -16,7 +65,7 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (moduleHistory.length === 0) return;
+      if (UIState.moduleHistory.length === 0) return;
       e.preventDefault();
       e.returnValue = "";
       return "";
@@ -27,7 +76,7 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [moduleHistory]);
+  }, [UIState.moduleHistory]);
 
   useEffect(() => {
     if (!user || !user.emailVerified) return;
@@ -38,10 +87,14 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
 
       if (!userSnap.exists()) {
         setCreditsUsed(0);
+        setClickedToday(false);
         return;
       }
 
+      const today = new Date().toISOString().split("T")[0];
+
       setCreditsUsed(userSnap.data().creditsUsed || 0);
+      setClickedToday(userSnap.data().lastClickDate === today);
     };
 
     fetchCredits();
@@ -56,7 +109,7 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
     }
 
     //OPENAI API CODE
-    const prompt = `Generate one brief ${type} about ${topic}`;
+    const prompt = `Generate one brief ${UIState.studyType} about ${topic}`;
 
     setGenerateLoading(true);
 
@@ -73,11 +126,22 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
         alert(data.error || "Error generating response");
         return;
       }
-      setModuleHistory((prev) => [{ id: Date.now(), message: data.message }, ...prev]);
+      
+      const newModule = {
+        id: Date.now(),
+        content: data.message,
+        parameters: { option: "AI"},
+      };
+      setUIState((prev) => ({
+        ...prev,
+        moduleHistory: [newModule, ...prev.moduleHistory],
+        overlayOption: null,
+      }));
       setTopic("");
 
-      setCreditsUsed((prev) => prev + 1);
+      setCreditsUsed(data.creditsUsed);
     } catch (err) {
+      console.error(err);
       alert("Error generating response");
     } finally {
       setGenerateLoading(false);
@@ -85,8 +149,52 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
     //END OF OPENAI API CODE
   };
 
+  const handleAddModule = () => {
+    if (UIState.studyType === "lesson") {
+      alert("Lessons coming soon");
+      return;
+    }
+
+    if (UIState.studyType === "difficult quiz problem") {
+      alert("Practice quizzes coming soon");
+      return;
+    }
+
+    const selectedSubtopics = [];
+    for (const subject in selectedSubjects) {
+      for (const subtopic in selectedSubjects[subject].subtopics) {
+        if (selectedSubjects[subject].subtopics[subtopic]) {
+          selectedSubtopics.push(subtopic);
+        }
+      }
+    }
+
+    if (selectedSubtopics.length === 0) return;
+
+    const [question, answer] = regenerateProblem(selectedSubtopics);
+
+    const newModule = {
+      id: Date.now(),
+      content: question,
+      parameters: { option: "curated", answer, selectedSubtopics, revealed: false },
+    };
+
+    setUIState((prev) => ({
+      ...prev,
+      moduleHistory: [newModule, ...prev.moduleHistory],
+      overlayOption: null,
+    }));
+
+    const resetSubjects = {};
+    for (const subject in subjectsData) {
+      resetSubjects[subject] = { checked: false, subtopics: {} };
+      subjectsData[subject].forEach((sub) => (resetSubjects[subject].subtopics[sub.name] = false));
+    }
+    setSelectedSubjects(resetSubjects);
+  };
+
   const handleDeleteModule = (id) => {
-    setModuleHistory((prev) => prev.filter((item) => item.id !== id));
+    setUIState((prev) => ({...prev, moduleHistory: prev.moduleHistory.filter((item) => item.id !== id)}));
   };
 
   return (
@@ -95,51 +203,210 @@ export default function Learn({ user, moduleHistory, setModuleHistory }) {
         What would you like to study today?
       </h2>
 
-      <div className="flex flex-wrap justify-center items-center w-full gap-3">
-        <div className="flex items-center bg-white shadow-md rounded-full px-4 py-2 w-full max-w-2xl transition-all duration-300 focus-within:shadow-lg">
-          <span className="text-gray-600 mr-2">I want </span>
+      <div className="flex">
+        <div className="flex justify-center items-center bg-white shadow-md rounded-full px-4 py-2 transition-all duration-300 focus-within:shadow-lg">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setUIState((prev) => ({...prev, studyType: "lesson"}))}
+              className={UIState.studyType === "lesson" ? "selected" : ""}
+            >
+              A lesson
+            </button>
 
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="bg-transparent border-none outline-none text-gray-600 font-medium mr-2 cursor-pointer"
-          >
-            <option value="lesson">a lesson </option>
-            <option value="practice problem">practice problems </option>
-            <option value="difficult quiz problem">a practice quiz </option>
-          </select>
+            <button
+              onClick={() => setUIState((prev) => ({...prev, studyType: "practice problem"}))}
+              className={UIState.studyType === "practice problem" ? "selected" : ""}
+            >
+              Practice problems
+            </button>
 
-          <span className="text-gray-600 mr-2">about </span>
-
-          <input
-            type="text"
-            placeholder="e.g., algebra, calculus"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            className="flex-1 border-none outline-none text-gray-600 placeholder-gray-400 font-medium bg-transparent"
-          />
+            <button
+              onClick={() => setUIState((prev) => ({...prev, studyType: "difficult quiz problem"}))}
+              className={UIState.studyType === "difficult quiz problem" ? "selected" : ""}
+            >
+              A practice quiz
+            </button>
+          </div>
         </div>
 
-        <button className="btn-ai" onClick={handleGenerateModule}>
-          {generateLoading ? "Generating..." : "Generate✨"}
-        </button>
+        <div className="flex justify-center items-center bg-white shadow-md rounded-full px-4 py-2 transition-all duration-300 focus-within:shadow-lg ml-4">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setUIState((prev) => ({...prev, overlayOption: (prev.overlayOption === "AI" ? null : "AI")}))}
+              className={UIState.overlayOption === "AI" ? "selected" : ""}
+            >
+              Generate with AI
+            </button>
 
-        {!isAdmin && user && user.emailVerified && (
-          <span className="ml-2 text-gray-600">
-            {Math.max(DAILY_CREDITS-creditsUsed,0)} credit{Math.max(DAILY_CREDITS-creditsUsed,0) !== 1 ? "s" : ""} left today
-          </span>
-        )}
+            <button
+              onClick={() => setUIState((prev) => ({...prev, overlayOption: (prev.overlayOption === "curated" ? null : "curated")}))}
+              className={UIState.overlayOption === "curated" ? "selected" : ""}
+            >
+              Use curated topics
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="w-full flex flex-col gap-2 mt-6">
-        {moduleHistory.map((item) => (
+      <div className="w-full flex flex-col gap-2 mt-6 relative">
+        {UIState.overlayOption === "AI" && (
+          <div className="absolute inset-0 z-20 flex items-start justify-center bg-black/40">
+            <div className="bg-white mx-2 justify-center rounded-xl shadow-2xl p-2 relative">
+              <input
+                type="text"
+                placeholder="e.g., algebra, calculus"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="flex-1 border-none outline-none text-gray-600 placeholder-gray-400 font-medium bg-transparent"
+                style={{
+                  width: `${Math.min(Math.max(topic.length + 1, 50), 100)}ch`,
+                }}
+              />
+              <button className="btn-generate ml-4 inline-flex items-center gap-2" onClick={handleGenerateModule}>
+                {generateLoading ? (
+                  <>
+                    Generating...
+                    <svg
+                      className="w-4 h-4 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                  </>
+                ) : (
+                  "✨ Generate module"
+                )}
+              </button>
+
+              {!isAdmin && user && user.emailVerified && (
+                <span className="ml-4 text-gray-600">
+                  {Math.max(DAILY_CREDITS-(clickedToday ? creditsUsed : 0),0)} credit{Math.max(DAILY_CREDITS-(clickedToday ? creditsUsed : 0),0) !== 1 ? "s" : ""} left today
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {UIState.overlayOption === "curated" && (
+          <div className="absolute inset-0 z-20 flex items-start justify-center bg-black/40">
+            <div className="bg-white w-full max-w-4xl mx-2 rounded-xl shadow-2xl p-6 relative">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2 underline">
+                Curated topics
+              </h3>
+
+              <h3 className="text-ms font-semibold text-gray-800 mb-2">
+                Math
+              </h3>
+
+              <div className="flex flex-col gap-3">
+                {Object.keys(subjectsData).map((subject) => (
+                  <div key={subject} className="flex flex-col gap-1">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedSubjects[subject].checked}
+                        onChange={() => handleSubjectChange(subject)}
+                      />
+                      <span className="font-medium">{subject}</span>
+                    </label>
+                    <div className="flex flex-col ml-6 gap-1">
+                      {subjectsData[subject].map((sub) => (
+                        <label key={sub.name} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedSubjects[subject].subtopics[sub.name]}
+                            onChange={() => handleSubtopicChange(subject, sub.name)}
+                          />
+                          {sub.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button className="btn-generate mt-4" onClick={handleAddModule}>
+                {"📚Add module"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {UIState.moduleHistory.map((item) => (
           <div
             key={item.id}
-            className="text-gray-600 flex justify-between items-center bg-white shadow-md rounded px-4 py-2"
+            className="text-gray-600 flex justify-between items-center bg-white shadow-md rounded px-4 py-2 relative z-0"
           >
-            <span>
-              {item.message}
-            </span>
+            {item.option === "AI" ? (
+              <span>
+                {item.content}
+              </span>
+            ) : (
+              <div className="flex items-center justify-between w-full">
+                <div className="flex flex-col">
+                  <span>{item.content}</span>
+
+                  {item.parameters?.revealed && item.parameters?.answer && (
+                    <span className="text-green-700 mt-1">
+                      Answer: {item.parameters.answer}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Reveal button */}
+                  <button
+                    className="btn-rvl"
+                    onClick={() => toggleReveal(item.id)}
+                    title="Reveal answer"
+                  >
+                    👁
+                  </button>
+
+                  {/* Regenerate button */}
+                  <button
+                    className="btn-rgn"
+                    onClick={() => {
+                      const [question, answer] = regenerateProblem(item.parameters.selectedSubtopics);
+
+                      setUIState((prev) => ({
+                        ...prev,
+                        moduleHistory: prev.moduleHistory.map((m) =>
+                          m.id === item.id
+                            ? {
+                                ...m,
+                                content: question,
+                                parameters: {
+                                  ...m.parameters,
+                                  answer,
+                                  revealed: false, // reset on regenerate
+                                },
+                              }
+                            : m
+                        ),
+                      }));
+                    }}
+                  >
+                    ⟳
+                  </button>
+                </div>
+              </div>
+            )}
+
             <button className="btn-x" onClick={() => handleDeleteModule(item.id)}>
               ✕
             </button>

@@ -58,7 +58,7 @@ export default function Profile({
         </button>
       </Link>
 
-      <Link href="/">
+      <Link href="/" className="ml-2">
         <button
           onClick={() =>
             signOut(auth)

@@ -316,7 +316,7 @@ export default function MiniGame({ user }) {
         onChange={(e) => setAnswer(e.target.value)}
       />
 
-      <button onClick={submit}>Submit</button>
+      <button onClick={submit} className="ml-2">Submit</button>
       <h4>{message}</h4>
 
     </div>
