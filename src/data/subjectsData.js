@@ -73,7 +73,7 @@ export const subjectsData = {
           const x = randomInt(-10,10);
           const y = randomInt(-10,10);
           const z = randomInt(-10,10);
-          const c = (-w*x+y*z);
+          const c = -(w*x+y*z);
           for (let j = -10; j <= 10; j++) {
             if (j === 0) continue;
             if (c % j === 0) {
