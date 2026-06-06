@@ -203,7 +203,7 @@ export default function Learn({ user, UIState, setUIState }) {
         What would you like to study today?
       </h2>
 
-      <div className="flex">
+      <div className="flex flex-wrap gap-4">
         <div className="flex justify-center items-center bg-white shadow-md rounded-full px-4 py-2 transition-all duration-300 focus-within:shadow-lg">
           <div className="flex gap-2">
             <button
@@ -257,9 +257,10 @@ export default function Learn({ user, UIState, setUIState }) {
                 placeholder="e.g., algebra, calculus"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                className="flex-1 border-none outline-none text-gray-600 placeholder-gray-400 font-medium bg-transparent"
+                className="border-none outline-none text-gray-600 placeholder-gray-400 font-medium bg-transparent"
                 style={{
-                  width: `${Math.min(Math.max(topic.length + 1, 50), 100)}ch`,
+                  width: `${Math.min(Math.max(topic.length + 1, 40), 80)}ch`,
+                  maxWidth: "100%",
                 }}
               />
               <button className="btn-generate ml-4 inline-flex items-center gap-2" onClick={handleGenerateModule}>
@@ -321,11 +322,11 @@ export default function Learn({ user, UIState, setUIState }) {
                         checked={selectedSubjects[subject].checked}
                         onChange={() => handleSubjectChange(subject)}
                       />
-                      <span className="font-medium">{subject}</span>
+                      <span className="font-medium text-gray-600">{subject}</span>
                     </label>
                     <div className="flex flex-col ml-6 gap-1">
                       {subjectsData[subject].map((sub) => (
-                        <label key={sub.name} className="flex items-center gap-2">
+                        <label key={sub.name} className="flex items-center gap-2 text-gray-600">
                           <input
                             type="checkbox"
                             checked={selectedSubjects[subject].subtopics[sub.name]}
